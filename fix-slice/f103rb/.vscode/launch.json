@@ -1,0 +1,47 @@
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
+//
+// PIO Unified Debugger
+//
+// Documentation: https://docs.platformio.org/page/plus/debugging.html
+// Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug",
+            "executable": "/home/p3nguinman/Dropbox (Isobe Lab.)/desktop-environment/baksheesh/f103rb/.pio/build/nucleo_f103rb/firmware.elf",
+            "projectEnvName": "nucleo_f103rb",
+            "toolchainBinDir": "/home/p3nguinman/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/home/p3nguinman/.platformio/platforms/ststm32/misc/svd/STM32F103xx.svd",
+            "preLaunchTask": {
+                "type": "PlatformIO",
+                "task": "Pre-Debug"
+            }
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (skip Pre-Debug)",
+            "executable": "/home/p3nguinman/Dropbox (Isobe Lab.)/desktop-environment/baksheesh/f103rb/.pio/build/nucleo_f103rb/firmware.elf",
+            "projectEnvName": "nucleo_f103rb",
+            "toolchainBinDir": "/home/p3nguinman/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/home/p3nguinman/.platformio/platforms/ststm32/misc/svd/STM32F103xx.svd"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (without uploading)",
+            "executable": "/home/p3nguinman/Dropbox (Isobe Lab.)/desktop-environment/baksheesh/f103rb/.pio/build/nucleo_f103rb/firmware.elf",
+            "projectEnvName": "nucleo_f103rb",
+            "toolchainBinDir": "/home/p3nguinman/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/home/p3nguinman/.platformio/platforms/ststm32/misc/svd/STM32F103xx.svd",
+            "loadMode": "manual"
+        }
+    ]
+}

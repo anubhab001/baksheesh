@@ -1,0 +1,115 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "/home/p3nguinman/Dropbox (Isobe Lab.)/desktop-environment/baksheesh/f103rb/include",
+                "/home/p3nguinman/Dropbox (Isobe Lab.)/desktop-environment/baksheesh/f103rb/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/avr",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/LL",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/usb",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/OpenAMP",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/usb/hid",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/usb/cdc",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/STM32F1xx_HAL_Driver/Inc",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/STM32F1xx_HAL_Driver/Src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/STM32F1xx",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/ST/STM32_USB_Device_Library/Core/Src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP/open-amp/lib/include",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP/libmetal/lib/include",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP/virtual_driver",
+                "/home/p3nguinman/.platformio/packages/framework-cmsis/CMSIS/Core/Include",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/gcc",
+                "/home/p3nguinman/.platformio/packages/framework-cmsis/CMSIS/DSP/Include",
+                "/home/p3nguinman/.platformio/packages/framework-cmsis/CMSIS/DSP/PrivateInclude",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/variants/STM32F1xx/F103R(8-B)T",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/CMSIS_DSP/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/EEPROM/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/IWatchdog/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Keyboard/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Mouse/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/SPI/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Servo/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/SoftwareSerial/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/SrcWrapper/src",
+                "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Wire/src",
+                "/home/p3nguinman/.platformio/packages/tool-unity",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/home/p3nguinman/Dropbox (Isobe Lab.)/desktop-environment/baksheesh/f103rb/include",
+                    "/home/p3nguinman/Dropbox (Isobe Lab.)/desktop-environment/baksheesh/f103rb/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/avr",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/LL",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/usb",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/OpenAMP",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/usb/hid",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino/stm32/usb/cdc",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/STM32F1xx_HAL_Driver/Inc",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/STM32F1xx_HAL_Driver/Src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/STM32F1xx",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/ST/STM32_USB_Device_Library/Core/Inc",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/ST/STM32_USB_Device_Library/Core/Src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP/open-amp/lib/include",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP/libmetal/lib/include",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Middlewares/OpenAMP/virtual_driver",
+                    "/home/p3nguinman/.platformio/packages/framework-cmsis/CMSIS/Core/Include",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/system/Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/gcc",
+                    "/home/p3nguinman/.platformio/packages/framework-cmsis/CMSIS/DSP/Include",
+                    "/home/p3nguinman/.platformio/packages/framework-cmsis/CMSIS/DSP/PrivateInclude",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/cores/arduino",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/variants/STM32F1xx/F103R(8-B)T",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/CMSIS_DSP/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/EEPROM/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/IWatchdog/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Keyboard/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Mouse/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/SPI/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Servo/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/SoftwareSerial/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/SrcWrapper/src",
+                    "/home/p3nguinman/.platformio/packages/framework-arduinoststm32/libraries/Wire/src",
+                    "/home/p3nguinman/.platformio/packages/tool-unity",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=50204",
+                "STM32F103xB",
+                "STM32F1xx",
+                "ARDUINO=10808",
+                "ARDUINO_ARCH_STM32",
+                "ARDUINO_NUCLEO_F103RB",
+                "BOARD_NAME=\"NUCLEO_F103RB\"",
+                "HAL_UART_MODULE_ENABLED",
+                "USE_FULL_LL_DRIVER",
+                "VARIANT_H=\"variant_NUCLEO_F103RB.h\"",
+                ""
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "compilerPath": "/home/p3nguinman/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mcpu=cortex-m3",
+                "-mthumb",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
