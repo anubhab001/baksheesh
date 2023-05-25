@@ -1,5 +1,5 @@
 # Baksheesh #
-This [repository](https://github.com/anubhab001/baksheesh) contains source-codes related to Baksheesh, which is a lightweight block cipher.
+This [repository](https://github.com/anubhab001/baksheesh) contains source-codes related to Baksheesh ([IACR ePrint](https://eprint.iacr.org/2023/750)), a lightweight block cipher.
 
 
 ## Directory Structure ##
