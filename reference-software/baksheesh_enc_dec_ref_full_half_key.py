@@ -85,8 +85,11 @@ def perm_layer(x, player):
 		y[player[i]] = x[i]
 	return y[:]
 
-def add_key(pt, key):
-	return [p^k for p, k in zip(pt, key)]
+def add_key(pt, key, half=True):
+	if half:
+		return [(p)^(k & 0b0110) for p, k in zip(pt, key)]
+	else:
+		return [p^k for p, k in zip(pt, key)]
 
 def preeety_print(x):
 	y = []
@@ -95,9 +98,9 @@ def preeety_print(x):
 	return (''.join(y))[::-1]
 
 
-def encrypt(key, pt, no_of_rounds=N_rounds):
+def encrypt(key, pt, no_of_rounds=N_rounds, half=True):
 	# round key add
-	pt = add_key(pt, key)
+	pt = add_key(pt, key, half=half)
 
 	for r in range(no_of_rounds):
 		# sbox
@@ -115,17 +118,17 @@ def encrypt(key, pt, no_of_rounds=N_rounds):
 		key = key_update(key, step=1)
 
 		# round key add
-		pt = add_key(pt, key)
+		pt = add_key(pt, key, half=half)
 		#print (r, preeety_print(key))
 
 	return pt
 
-def decrypt(key, pt, no_of_rounds=N_rounds):
+def decrypt(key, pt, no_of_rounds=N_rounds, half=True):
 	key = key_update(key, step=N_rounds)
 	for r in range(no_of_rounds)[::-1]:
 
 		# round key add
-		pt = add_key(pt, key)
+		pt = add_key(pt, key, half=half)
 
 		# Run key update
 		key = key_update(key, step=-1)
@@ -145,18 +148,20 @@ def decrypt(key, pt, no_of_rounds=N_rounds):
 	# Run key update
 	key = key_update(key, step=0)[:]
 	# round key add
-	pt = add_key(pt, key)
+	pt = add_key(pt, key, half=half)
 
 	return pt
 
 
 if __name__ == '__main__':
 
-	key = [15]*32# [5, 1, 9, 6, 7, 0xe, 1, 2,3, 5, 2, 4, 8, 9, 10, 3, 3, 14, 1, 6, 12, 11, 2, 5, 11, 15, 15, 14, 0, 2, 9, 5] #[0,0,0,1,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,]
+	key = [0]*32# [5, 1, 9, 6, 7, 0xe, 1, 2,3, 5, 2, 4, 8, 9, 10, 3, 3, 14, 1, 6, 12, 11, 2, 5, 11, 15, 15, 14, 0, 2, 9, 5] #[0,0,0,1,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,]
 
 	#[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,]
-	pt = [1]*32 #[0xc, 1, 8, 0, 0xa, 3, 4, 9, 6, 2, 1,0xe, 5, 0, 8, 7, 0xd, 0x3, 0xf, 3, 6, 0xf, 0xb, 0xa, 1, 3, 5, 7, 1, 5, 6, 0xe] #[4,4,4,4,0xc,4,4,4,4,4, 4,4,4,4,4,4,4,4,4,4, 4,4,4,4,4,4,4,4,4,4, 4,4,]
+	pt = [4]*32 #[0xc, 1, 8, 0, 0xa, 3, 4, 9, 6, 2, 1,0xe, 5, 0, 8, 7, 0xd, 0x3, 0xf, 3, 6, 0xf, 0xb, 0xa, 1, 3, 5, 7, 1, 5, 6, 0xe] #[4,4,4,4,0xc,4,4,4,4,4, 4,4,4,4,4,4,4,4,4,4, 4,4,4,4,4,4,4,4,4,4, 4,4,]
 	#[0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,]
+	half = False ################ Full key
+
 	print (len(key))
 	print('Encryption:')
 	print ('Key', preeety_print(key))
@@ -166,13 +171,35 @@ if __name__ == '__main__':
 	assert len(pt) == 32
 	assert len(key) == 32
 	assert N_rounds == 35, 'Incorrect number of rounds'
-	ct = encrypt(key=key[:], pt=pt[:], no_of_rounds=N_rounds)
+	ct = encrypt(key=key[:], pt=pt[:], no_of_rounds=N_rounds, half=half)
 	print ('CT ', preeety_print(ct))
 
 	print('Decryption:')
 	print ('Key', preeety_print(key))
 	print ('CT ', preeety_print(ct))
-	pt = decrypt(key=key[:], pt=ct[:], no_of_rounds=N_rounds)
+	pt = decrypt(key=key[:], pt=ct[:], no_of_rounds=N_rounds, half=half)
+	print ('PT ', preeety_print(pt))
+	assert pt == pt_orig, 'Decrypted ciphertext not matching with plaintext'
+
+
+	half = True ################ Half key
+
+	print (len(key))
+	print('Encryption:')
+	print ('Key', preeety_print(key))
+	print ('PT ', preeety_print(pt))
+	pt_orig = pt[:]
+
+	assert len(pt) == 32
+	assert len(key) == 32
+	assert N_rounds == 35, 'Incorrect number of rounds'
+	ct = encrypt(key=key[:], pt=pt[:], no_of_rounds=N_rounds, half=half)
+	print ('CT ', preeety_print(ct))
+
+	print('Decryption:')
+	print ('Key', preeety_print(key))
+	print ('CT ', preeety_print(ct))
+	pt = decrypt(key=key[:], pt=ct[:], no_of_rounds=N_rounds, half=half)
 	print ('PT ', preeety_print(pt))
 	assert pt == pt_orig, 'Decrypted ciphertext not matching with plaintext'
 	
