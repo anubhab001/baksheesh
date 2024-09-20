@@ -149,7 +149,7 @@ void Baksheesh_enc(unsigned char *state, unsigned char *key){
 
     //addroundkey
     for(int i = 0; i < 32; i++){
-      state[i] ^= key[i];
+      state[i] ^= (key[i] & 0b1101);
     }
 
   }
@@ -168,7 +168,7 @@ void Baksheesh_dec(unsigned char *state, unsigned char *key){
 
     //addroundkey
     for(int i = 0; i < 32; i++){
-      state[i] ^= key[i];
+      state[i] ^= (key[i] & 0b1101);
     }
 
     Key_update_dec(key);
