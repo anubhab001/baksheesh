@@ -23,7 +23,7 @@ def sbox_layer(pt, sbox):
 
 def bits_to_nibble(x):
 	assert len(x) == 4
-	y = x[0]*1 + x[1]*2 + x[2]*4 + x[3]*8
+	y = x[3]*1 + x[2]*2 + x[1]*4 + x[0]*8
 	return y
 
 def bits_to_nibbles(x):
@@ -35,7 +35,7 @@ def bits_to_nibbles(x):
 
 def nibble_to_bits(x):
 	y = []
-	z = [zz == '1' for zz in (bin(x)[2:]).zfill(4)][::-1]
+	z = [zz == '1' for zz in (bin(x)[2:]).zfill(4)]
 	y.extend(z)
 	return y
 
@@ -54,7 +54,7 @@ def nibble_encoding(a):
 	return nibbles_to_bits(b)
 
 def key_update(key, step=1):
-	# right rotate the entire key 1 step
+	# Right rotate the entire key 1 step
 	#print ('Key', pretty_print(key))
 	temp_key = nibbles_to_bits(key)
 	temp_key = temp_key[+step:] + temp_key[:+step]
@@ -85,7 +85,7 @@ def perm_layer(x, player):
 		y[player[i]] = x[i]
 	return y[:]
 
-def add_key(pt, key, xor_cover=1):
+def add_key(pt, key, xor_cover=1.0):
 	if xor_cover == 1.0: # Full round key XOR
 		return [(p^k) for p, k in zip(pt, key)]
 
@@ -165,7 +165,7 @@ def decrypt(key, pt, no_of_rounds=N_rounds, xor_cover=1.0):
 
 if __name__ == '__main__':
 
-	key = [1]*32
+	key = [0]*32
 	pt = [0]*32 
 	
 	# xor_cover = 1.0 ################ Full key
@@ -210,9 +210,10 @@ if __name__ == '__main__':
 	pt = decrypt(key=key[:], pt=ct[:], no_of_rounds=N_rounds, xor_cover=xor_cover)
 	print ('PT ', pretty_print(pt))
 	assert pt == pt_orig, 'Decrypted ciphertext not matching with plaintext'
-	
+
+
 # """
 # Key 00000000000000000000000000000000
-# CT  c002be5e64c78a72ab9a3439518352aa
 # PT  00000000000000000000000000000000
+# CT  5b447b7ad394ad8650e90664c6bca198
 # """
