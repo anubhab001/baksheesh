@@ -9,7 +9,7 @@ This [repository](https://github.com/anubhab001/baksheesh) contains source-codes
 ├── fix-slice
 ├── hardware-threshold-no_decomposition_order_3
 ├── hardware-unprotected
-├── optimised-software
+├── optimised-software-fix_slice
 └── reference-software
 ```
     

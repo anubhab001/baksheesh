@@ -1,4 +1,4 @@
-/*
+/* THIS IS KEPT AS-IS FROM ORIGINAL FIX-SLICE PROJECT (ON GIFT)
  * This implementation is based on the Fixslicing method described in the paper:
  * "Fixslicing: A New GIFT Representation" by Aadil A. and Thomas Peyrin.
  *
@@ -29,7 +29,7 @@
 #define NIBBLE_ROR_3(x) ((((x) >> 3) & 0x11111111) | (((x)&0x77777777) << 1))
 
 #define ROUND 16
-#define NUMBER_OF_LOOP 32
+#define NUMBER_OF_LOOP 35
 
 #define Nb 16
 
