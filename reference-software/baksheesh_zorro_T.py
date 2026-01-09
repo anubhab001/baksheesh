@@ -1,20 +1,18 @@
 """
-BAKSHEESH Zorro with 128×128 Binary T-matrix
+BAKSHEESH Zorro with 128×128 Binary Matrix T (computed on-the-fly)
 
 Architecture:
-1. Apply 3-bit S-box to all 32 nibbles (lower 3 bits of each)
-2. Combine with x3 bits using 128×128 binary T-matrix (linear transformation)
+1. Apply 3-bit SBox to all 32 nibbles (lower 3 bits of each)
+2. Combine with x3 bits using 128×128 binary matrix T
 
 """
 
 from typing import List, Sequence
 
-# 3-bit S-box (nonlinear, secret)
+# 3-bit SBox (nonlinear, secret)
 SBOX_3BIT = [1, 0, 3, 6, 5, 2, 4, 7]
 
 # 128×128 Binary T-matrix (linear transformation over GF(2))
-# This matrix combines outputs from 32× 3-bit S-boxes (96 bits) + 32× x3 bits (32 bits) → 128 output bits
-# The matrix is block-diagonal with 32 copies of the 4×4 sub-matrix
 TMATRIX_4x4 = [
     [1, 1, 0, 0],  # y3 = x3 ⊕ z2
     [1, 0, 1, 0],  # y2 = x3 ⊕ z1
@@ -46,11 +44,11 @@ N_rounds = 35
 
 def apply_sbox_layer(state_nibbles: Sequence[int]) -> List[int]:
     """
-    Apply 3-bit S-box layer to all 32 nibbles, then combine with T-matrix.
+    Apply 3-bit SBox layer to all 32 nibbles, then combine with T-matrix.
     
     This implementation applies the 128×128 T-matrix to the entire state:
     - Extract x3 bits from all 32 nibbles (32 bits)
-    - Apply 3-bit S-box to lower 3 bits of all 32 nibbles (96 bits output)
+    - Apply 3-bit SBox to lower 3 bits of all 32 nibbles (96 bits output)
     - Combine with 128×128 T-matrix: [x3_0, z2_0, z1_0, z0_0, x3_1, z2_1, ..., z0_31]
     """
     output_nibbles = []
@@ -62,7 +60,7 @@ def apply_sbox_layer(state_nibbles: Sequence[int]) -> List[int]:
         x2 = (nibble >> 2) & 1
         x3 = (nibble >> 3) & 1
         
-        # Stage 1: Apply 3-bit S-box to lower 3 bits
+        # Stage 1: Apply 3-bit SBox to lower 3 bits
         inp_3bit = (x2 << 2) | (x1 << 1) | x0
         s3_out = SBOX_3BIT[inp_3bit]
         
@@ -109,7 +107,7 @@ def apply_sbox_layer_explicit_128x128(state_nibbles: Sequence[int]) -> List[int]
         x2 = (nibble >> 2) & 1
         x3 = (nibble >> 3) & 1
         
-        # Apply 3-bit S-box
+        # Apply 3-bit SBox
         inp_3bit = (x2 << 2) | (x1 << 1) | x0
         s3_out = SBOX_3BIT[inp_3bit]
         

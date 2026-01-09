@@ -1,16 +1,16 @@
 """
 BAKSHEESH Zorro with:
-1. Zorro 3-bit S-box on (x2, x1, x0)
-2. T-matrix 4-bit S-box on (x3, z2, z1, z0)
+1. Zorro 3-bit SBox on (x2, x1, x0)
+2. T-matrix 4-bit SBox on (x3, z2, z1, z0)
 """
 
 from typing import List, Sequence
 
-# 3-bit S-box (derived from bits [3:1] of BAKSHEESH outputs)
+# 3-bit SBox 
 SBOX_3BIT = [1, 0, 3, 6, 5, 2, 4, 7]
 
 # T-matrix: 4×4 binary matrix (linear transformation over GF(2))
-# Transformation: [y3, y2, y1, y0]^T = TMATRIX @ [x3, z2, z1, z0]^T (mod 2)
+# Transformation: [y3, y2, y1, y0]^T = TMATRIX @ [x3, z2, z1, z0]^T 
 TMATRIX = [
     [1, 1, 0, 0],  # y3 = x3 ⊕ z2
     [1, 0, 1, 0],  # y2 = x3 ⊕ z1
@@ -43,7 +43,7 @@ N_rounds = 35
 def apply_two_stage_sbox(nibble: int) -> int:
     """
     Two-stages:
-    1. Apply 3-bit S-box to (x2, x1, x0) → (z2, z1, z0)
+    1. Apply 3-bit SBox to (x2, x1, x0) → (z2, z1, z0)
     2. Apply 4×4 binary T-matrix (linear transformation over GF(2))
     """
     x0 = (nibble >> 0) & 1
@@ -51,7 +51,7 @@ def apply_two_stage_sbox(nibble: int) -> int:
     x2 = (nibble >> 2) & 1
     x3 = (nibble >> 3) & 1
     
-    # Stage 1: Apply 3-bit S-box to lower 3 bits
+    # Stage 1: Apply 3-bit SBox to lower 3 bits
     inp_3bit = (x2 << 2) | (x1 << 1) | x0
     s3_out = SBOX_3BIT[inp_3bit]
     
@@ -171,7 +171,7 @@ def add_round_constants_bits(bits: List[int], rc: int) -> None:
 
 
 def apply_sbox_layer(state: Sequence[int]) -> List[int]:
-    """Apply two-stage S-box to all nibbles"""
+    """Apply two-stage SBox to all nibbles"""
     return [apply_two_stage_sbox(n) for n in state]
 
 
