@@ -18,7 +18,7 @@ TMATRIX = [
     [1, 0, 1, 1],  # y0 = x3 ⊕ z1 ⊕ z0
 ]
 
-# Bit-permutation (Canonical/C++ version)
+# Bit-permutation (Canonical)
 player = (
     96, 65, 34, 3, 64, 33, 2, 99, 32, 1, 98, 67, 0, 97, 66, 35,
     100, 69, 38, 7, 68, 37, 6, 103, 36, 5, 102, 71, 4, 101, 70, 39,
@@ -239,7 +239,7 @@ def hex_to_nibbles(hex_str: str) -> List[int]:
 if __name__ == '__main__':
     print("=" * 60)
     
-    # Test vectors 
+    # Test vectors from paper
     test_vectors = [
         {
             'plaintext': '00000000000000000000000000000000',
