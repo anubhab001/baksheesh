@@ -269,7 +269,7 @@ if __name__ == '__main__':
     print("BAKSHEESH Zorro - Explicit 128×128 T-matrix Implementation")
     print()
     
-    # Test vectors from designR.tex
+    # Test vectors from paper
     test_vectors = [
         {
             'plaintext': '00000000000000000000000000000000',

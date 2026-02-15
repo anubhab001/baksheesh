@@ -319,7 +319,7 @@ def hex_to_nibbles(hex_str: str) -> List[int]:
 if __name__ == '__main__':
     print("=" * 70)
     
-    # Test vectors from designR.tex
+    # Test vectors from paper
     test_vectors = [
         {
             'plaintext': '00000000000000000000000000000000',
