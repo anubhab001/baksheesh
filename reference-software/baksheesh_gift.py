@@ -3,7 +3,7 @@ BAKSHEESH Reference Implementation (Canonical Permutation)
 
 Usage:
 - encrypt(key, pt, use_gift_permutation=True)   # GIFT-matching bit-permutation
-- encrypt(key, pt, use_gift_permutation=False)  # Canonical (C++-matching) bit-permutation
+- encrypt(key, pt, use_gift_permutation=False)  # Canonical (C++ reference code by Peng-Liu-Ling) bit-permutation
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ inv_player_gift_based = (
     68, 73, 78, 67, 84, 89, 94, 83, 100, 105, 110, 99, 116, 121, 126, 115,
 )
 
-# Alternate bit-permutation (C++ canonical ordering)
+# Alternate bit-permutation (canonical ordering)
 player = (
     96, 65, 34, 3, 64, 33, 2, 99, 32, 1, 98, 67, 0, 97, 66, 35,
     100, 69, 38, 7, 68, 37, 6, 103, 36, 5, 102, 71, 4, 101, 70, 39,
@@ -326,7 +326,7 @@ if __name__ == '__main__':
     key = [0] * 32
     pt = [0] * 32
 
-    print("\n--- Canonical (C++-matching) permutation ---")
+    print("\n--- Canonical permutation ---")
     ct_alt = encrypt(key=key[:], pt=pt[:], use_gift_permutation=False)
     print('CT ', pretty_print(ct_alt))
     dec_alt = decrypt(key=key[:], ct=ct_alt[:], use_gift_permutation=False)
