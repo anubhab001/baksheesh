@@ -1,5 +1,5 @@
 """
-BAKSHEESH Reference Implementation (Canonical Permutation)
+BAKSHEESH Reference Implementation (Canonical and GIFT-matching Permutations)
 
 Usage:
 - encrypt(key, pt, use_gift_permutation=True)   # GIFT-matching bit-permutation
@@ -36,7 +36,7 @@ inv_player_gift_based = (
     68, 73, 78, 67, 84, 89, 94, 83, 100, 105, 110, 99, 116, 121, 126, 115,
 )
 
-# Alternate bit-permutation (canonical ordering)
+# Canonical bit-permutation (non GIFT-matching)
 player = (
     96, 65, 34, 3, 64, 33, 2, 99, 32, 1, 98, 67, 0, 97, 66, 35,
     100, 69, 38, 7, 68, 37, 6, 103, 36, 5, 102, 71, 4, 101, 70, 39,
@@ -47,8 +47,7 @@ player = (
     120, 89, 58, 27, 88, 57, 26, 123, 56, 25, 122, 91, 24, 121, 90, 59,
     124, 93, 62, 31, 92, 61, 30, 127, 60, 29, 126, 95, 28, 125, 94, 63,
 )
-
-INV_PLAYER = (
+inv_player = (
     12, 9, 6, 3, 28, 25, 22, 19, 44, 41, 38, 35, 60, 57, 54, 51,
     76, 73, 70, 67, 92, 89, 86, 83, 108, 105, 102, 99, 124, 121, 118, 115,
     8, 5, 2, 15, 24, 21, 18, 31, 40, 37, 34, 47, 56, 53, 50, 63,
@@ -303,7 +302,7 @@ def decrypt(key: Sequence[int], ct: Sequence[int], no_of_rounds: int = N_ROUNDS)
     for rnd in reversed(range(no_of_rounds)):
         bits = _words_to_bits(state_words)
         _add_round_constants_bits(bits, RC[rnd])
-        bits = perm_layer(bits, INV_PLAYER)
+        bits = perm_layer(bits, inv_player)
         state_nibbles = bits_to_nibbles(bits)
         state_nibbles = _apply_inv_sbox_layer(state_nibbles)
         state_words = _nibbles_to_words(state_nibbles)
