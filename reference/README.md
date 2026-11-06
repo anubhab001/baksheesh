@@ -3,7 +3,7 @@
 Round key and state at round end for every round of one encryption, generated
 from `baksheesh.py`. Values follow its reading order (leftmost character =
 nibble 0 of the state array). Round 00 denotes the whitening step; its round
-key is the master key. Per-layer values are given in `encryption_trace.txt`.
+key is the master key.
 
 Both encodings are valid, as long as one is used consistently:
 
