@@ -1,10 +1,10 @@
 # Round-by-Round Encryption Walkthrough
 
-* Plaintext : `57cf5777053928343047ebe8dbfc374f` (left to right) = `f473cfbd8ebe7403438293507775fc75` (right to left)
-* Key       : `25798b6c2b24cd83281de76786213b86` (left to right)
-* Ciphertext: `62b9d55d799a3e784583e7377229a623` (left to right) = `326a9227737e385487e3a997d55d9b26` (right to left)
+* Plaintext : `57cf5777053928343047ebe8dbfc374f` (left-to-right) = `f473cfbd8ebe7403438293507775fc75` (right-to-left)
+* Key       : `25798b6c2b24cd83281de76786213b86` (left-to-right)
+* Ciphertext: `62b9d55d799a3e784583e7377229a623` (left-to-right) = `326a9227737e385487e3a997d55d9b26` (right-to-left)
 
-| Round | Round key | State at round end |
+| Round | Round key | Updated state (at round end) |
 |:-:|:-:|:-:|
 | 00 | `25798b6c2b24cd83281de76786213b86` | `72b6dc1b2e1de5b7185a0c8f5ddd0cc9` |
 | 01 | `12bc45b69592e6c1940ef3b343109dc3` | `b217800bf3f4b946d6686351eb079de7` |
