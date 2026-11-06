@@ -1,15 +1,8 @@
-# Round-by-Round Encryption Update
-
-Round key and state at round end for every round of one encryption, generated
-from `baksheesh.py`. Values follow its reading order (leftmost character =
-nibble 0 of the state array). Round 00 denotes the whitening step; its round
-key is the master key.
-
-Both encodings are valid, as long as one is used consistently:
+# Round-by-Round Encryption Walkthrough
 
 * Plaintext : `57cf5777053928343047ebe8dbfc374f` (left to right) = `f473cfbd8ebe7403438293507775fc75` (right to left)
 * Key       : `25798b6c2b24cd83281de76786213b86` (left to right)
-* Ciphertext: `62b9d55d799a3e784583e7377229a623` (left to right) = `326a9227737e385487e3a997d55d9b26` (right to left; equals round 35 state)
+* Ciphertext: `62b9d55d799a3e784583e7377229a623` (left to right) = `326a9227737e385487e3a997d55d9b26` (right to left)
 
 | Round | Round key | State at round end |
 |:-:|:-:|:-:|
