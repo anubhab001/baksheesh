@@ -1,4 +1,4 @@
-/* THIS IS KEPT AS-IS FROM ORIGINAL FIX-SLICE PROJECT (ON GIFT)
+/*
  * This implementation is based on the Fixslicing method described in the paper:
  * "Fixslicing: A New GIFT Representation" by Aadil A. and Thomas Peyrin.
  *
@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 
 #define ROR(x, y) (((x) >> (y)) | ((x) << (32 - (y))))
@@ -29,7 +30,7 @@
 #define NIBBLE_ROR_3(x) ((((x) >> 3) & 0x11111111) | (((x)&0x77777777) << 1))
 
 #define ROUND 16
-#define NUMBER_OF_LOOP 35
+#define NUMBER_OF_LOOP 32
 
 #define Nb 16
 
@@ -106,11 +107,11 @@ uint8_t ciphertext[NUM_TEST_VECTORS][BLOCK_SIZE] = {
     { 0xc0, 0x02, 0xbe, 0x5e, 0x64, 0xc7, 0x8a, 0x72,
       0xab, 0x9a, 0x34, 0x39, 0x51, 0x83, 0x52, 0xaa },
     // Ciphertext 2
-    { 0x6f, 0x7d, 0x77, 0x46, 0xea, 0xf0, 0xd9, 0x7a,
-      0x15, 0x40, 0x79, 0xf6, 0xbd, 0x84, 0x64, 0x38 },
-    // Ciphertext 3
     { 0x1b, 0xa3, 0x36, 0x37, 0x34, 0xc0, 0x9a, 0x29,
       0xf6, 0x7c, 0x23, 0xbb, 0xb2, 0xcc, 0xcc, 0x05 },
+    // Ciphertext 3
+    { 0x6f, 0x7d, 0x77, 0x46, 0xea, 0xf0, 0xd9, 0x7a,
+      0x15, 0x40, 0x79, 0xf6, 0xbd, 0x84, 0x64, 0x38 },
     // Ciphertext 4
     { 0x7a, 0xd3, 0x30, 0x36, 0x67, 0xb2, 0xaf, 0x6d,
       0xee, 0xf4, 0x34, 0xdd, 0x11, 0x0d, 0x7f, 0xb8 },
@@ -118,14 +119,14 @@ uint8_t ciphertext[NUM_TEST_VECTORS][BLOCK_SIZE] = {
     { 0x80, 0x6f, 0x0c, 0xf4, 0x5b, 0x94, 0xf0, 0x37,
       0x02, 0x06, 0x97, 0x5f, 0xe7, 0x8a, 0xc1, 0x0f },
     // Ciphertext 6
-    { 0xae, 0x65, 0x4b, 0x53, 0x33, 0xb8, 0x76, 0x58,
-      0x4f, 0x8e, 0x8d, 0xd5, 0x4f, 0x4e, 0x49, 0x0a },
+    { 0xf5, 0x68, 0xe4, 0xe6, 0x28, 0xf7, 0x23, 0xee,
+      0x6d, 0x5f, 0xba, 0xcc, 0xcf, 0x81, 0x15, 0x23 },
     // Ciphertext 7
-    { 0x3d, 0xbb, 0xdf, 0x7f, 0xe2, 0x54, 0xcc, 0x0b,
-      0xe3, 0x96, 0xa7, 0x53, 0x44, 0x2d, 0xcc, 0xad },
+    { 0x77, 0xac, 0xde, 0xed, 0x64, 0x5e, 0x49, 0xda,
+      0x25, 0x59, 0x1b, 0xf5, 0xf3, 0x26, 0x58, 0xa2 },
     // Ciphertext 8
-    { 0xfc, 0x7e, 0x61, 0xfe, 0xe3, 0xd5, 0x87, 0x30,
-      0x8c, 0xa7, 0xbc, 0x59, 0x4e, 0xbf, 0x32, 0x44 }
+    { 0xea, 0x5e, 0x07, 0x13, 0x24, 0x94, 0x00, 0xa8,
+      0x6e, 0xc6, 0x1b, 0xb6, 0xcd, 0xff, 0xb3, 0x64 }
 };
 
 #define SWAPMOVE(a, b, mask, n)          \
@@ -198,8 +199,14 @@ s1 ^= (rkey)[19];\
 })
 
 
-void packing(u32* state, const u8* input) {
+void packing(u32* state, const u8* raw) {
     u32 tmp;
+    u8 input[16];
+    // Reverse the 32-nibble order to match the specification byte convention
+    for (int k = 0; k < 16; k++) {
+        u8 b = raw[15 - k];
+        input[k] = ((b & 0x0f) << 4) | ((b >> 4) & 0x0f);
+    }
     state[0] =
     (input[6] << 24) | (input[7] << 16) | (input[14] << 8) | input[15];
     state[1] =
@@ -322,52 +329,57 @@ void nibble_swap_roundkey(unsigned char SubKey[36][16]) {
     }
 }
 
+// Round-constant tap positions (bit index, MSB first within each nibble)
+static const int RoundConstLoc[6] = {11, 14, 16, 32, 64, 105};
+
+// Rotate the key one bit left in the LSB-first 16-bit word layout, where each group of four nibbles packs into one word
+void key_rotate(unsigned char nibbles[32]) {
+    unsigned char tmp[128], buf[128];
+    for (int g = 0; g < 8; g++) {
+        u32 w = ((u32)nibbles[4*g] << 12) | ((u32)nibbles[4*g+1] << 8) | ((u32)nibbles[4*g+2] << 4) | (u32)nibbles[4*g+3];
+        for (int s = 0; s < 16; s++) tmp[16*g + s] = (w >> s) & 1;
+    }
+    for (int i = 0; i < 127; i++) buf[i] = tmp[i + 1];
+    buf[127] = tmp[0];
+    for (int g = 0; g < 8; g++) {
+        u32 w = 0;
+        for (int s = 0; s < 16; s++) w |= ((u32)buf[16*g + s]) << s;
+        nibbles[4*g]   = (w >> 12) & 0xf;
+        nibbles[4*g+1] = (w >> 8)  & 0xf;
+        nibbles[4*g+2] = (w >> 4)  & 0xf;
+        nibbles[4*g+3] = w & 0xf;
+    }
+}
+
+// Fold round constant RC[r] into a round-key byte value at the specification tap positions
+void fold_round_constant(unsigned char SubKey[16], int r) {
+    for (int j = 0; j < 6; j++) {
+        if ((RoundConstant[r] >> j) & 1) {
+            int p = RoundConstLoc[j];
+            int n = p / 4, b = 3 - (p % 4);
+            SubKey[n / 2] ^= 1 << ((n & 1) ? b : b + 4);
+        }
+    }
+}
+
 void KeySchedule(unsigned char Key[16], unsigned char SubKey[36][16]){
-    
-    unsigned char tmp[128];
-    unsigned char rotated_key[128];
-    
-    
-    
-    for(int i=0;i<16;i++){
+    unsigned char nibbles[32];
+
+    for (int i = 0; i < 16; i++) {
         SubKey[0][i] = Key[i];
     }
     for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 8; j++) {
-            tmp[(i * 8) + j] = (SubKey[0][15-i] >> (j)) & 0x1;
-        }
+        nibbles[2*i]   = Key[i] >> 4;
+        nibbles[2*i+1] = Key[i] & 0x0f;
     }
-    
-    
-    for(int i =0;i<35;i++){
-        //rotation
-        for(int j = 0; j < 127; j++){
-            rotated_key[j] = tmp[j + 1];
-        }
-        rotated_key[127] = tmp[0];
-        
-        for(int j = 0; j < 128; j++){
-            tmp[j] = rotated_key[j];
-        }
-        
-        
-        rotated_key[8] ^= RoundConstant[i] & (0x1);
-        rotated_key[13] ^= (RoundConstant[i]>>1) & (0x1);
-        rotated_key[19] ^= (RoundConstant[i]>>2) & (0x1);
-        rotated_key[35] ^= (RoundConstant[i]>>3) & (0x1);
-        rotated_key[67] ^= (RoundConstant[i]>>4) & (0x1);
-        rotated_key[106] ^= (RoundConstant[i]>>5) & (0x1);
-        
-        
+
+    for (int i = 0; i < 35; i++) {
+        key_rotate(nibbles);
         for (int j = 0; j < 16; j++) {
-            SubKey[i+1][15-j] = 0;
-            for (int k = 0; k < 8; k++) {
-                SubKey[i+1][15-j] |= (rotated_key[(j * 8) + k] & 0x1) << (k);
-            }
+            SubKey[i+1][j] = (nibbles[2*j] << 4) | nibbles[2*j+1];
         }
+        fold_round_constant(SubKey[i+1], i);
     }
-    
-    
 }
 
 

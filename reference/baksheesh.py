@@ -1,43 +1,20 @@
 """
-BAKSHEESH Reference Implementation (Canonical and GIFT-matching Permutations)
+BAKSHEESH Reference Implementation (Canonical Permutation)
 
-Usage:
-- encrypt(key, pt, use_gift_permutation=True)   # GIFT-matching bit-permutation
-- encrypt(key, pt, use_gift_permutation=False)  # Canonical (C++ reference code by Peng-Liu-Ling) bit-permutation
+This is the canonical BAKSHEESH cipher implementation using the C++-matching
+bit permutation. All test vectors are from designR.tex specification.
 """
 
 from __future__ import annotations
 
 from typing import Iterable, List, Sequence
 
-# SBox (GIFT-heritage): 306DB58ECF924A71
+# S-box (GIFT-heritage): 306DB58ECF924A71
 LS_sbox = (3, 0, 6, 13, 11, 5, 8, 14, 12, 15, 9, 2, 4, 10, 7, 1)
 LS_inv_sbox = (1, 15, 11, 0, 12, 5, 2, 14, 6, 10, 13, 4, 8, 3, 7, 9)
 
-# Bit-permutation (GIFT-matching version)
-player_gift_based = (
-    0, 33, 66, 99, 96, 1, 34, 67, 64, 97, 2, 35, 32, 65, 98, 3,
-    4, 37, 70, 103, 100, 5, 38, 71, 68, 101, 6, 39, 36, 69, 102, 7,
-    8, 41, 74, 107, 104, 9, 42, 75, 72, 105, 10, 43, 40, 73, 106, 11,
-    12, 45, 78, 111, 108, 13, 46, 79, 76, 109, 14, 47, 44, 77, 110, 15,
-    16, 49, 82, 115, 112, 17, 50, 83, 80, 113, 18, 51, 48, 81, 114, 19,
-    20, 53, 86, 119, 116, 21, 54, 87, 84, 117, 22, 55, 52, 85, 118, 23,
-    24, 57, 90, 123, 120, 25, 58, 91, 88, 121, 26, 59, 56, 89, 122, 27,
-    28, 61, 94, 127, 124, 29, 62, 95, 92, 125, 30, 63, 60, 93, 126, 31,
-)
-inv_player_gift_based = (
-    0, 5, 10, 15, 16, 21, 26, 31, 32, 37, 42, 47, 48, 53, 58, 63,
-    64, 69, 74, 79, 80, 85, 90, 95, 96, 101, 106, 111, 112, 117, 122, 127,
-    12, 1, 6, 11, 28, 17, 22, 27, 44, 33, 38, 43, 60, 49, 54, 59,
-    76, 65, 70, 75, 92, 81, 86, 91, 108, 97, 102, 107, 124, 113, 118, 123,
-    8, 13, 2, 7, 24, 29, 18, 23, 40, 45, 34, 39, 56, 61, 50, 55,
-    72, 77, 66, 71, 88, 93, 82, 87, 104, 109, 98, 103, 120, 125, 114, 119,
-    4, 9, 14, 3, 20, 25, 30, 19, 36, 41, 46, 35, 52, 57, 62, 51,
-    68, 73, 78, 67, 84, 89, 94, 83, 100, 105, 110, 99, 116, 121, 126, 115,
-)
-
-# Canonical bit-permutation (non GIFT-matching)
-player = (
+# Canonical bit-permutation (C++-matching)
+PLAYER = (
     96, 65, 34, 3, 64, 33, 2, 99, 32, 1, 98, 67, 0, 97, 66, 35,
     100, 69, 38, 7, 68, 37, 6, 103, 36, 5, 102, 71, 4, 101, 70, 39,
     104, 73, 42, 11, 72, 41, 10, 107, 40, 9, 106, 75, 8, 105, 74, 43,
@@ -47,7 +24,8 @@ player = (
     120, 89, 58, 27, 88, 57, 26, 123, 56, 25, 122, 91, 24, 121, 90, 59,
     124, 93, 62, 31, 92, 61, 30, 127, 60, 29, 126, 95, 28, 125, 94, 63,
 )
-inv_player = (
+
+INV_PLAYER = (
     12, 9, 6, 3, 28, 25, 22, 19, 44, 41, 38, 35, 60, 57, 54, 51,
     76, 73, 70, 67, 92, 89, 86, 83, 108, 105, 102, 99, 124, 121, 118, 115,
     8, 5, 2, 15, 24, 21, 18, 31, 40, 37, 34, 47, 56, 53, 50, 63,
@@ -193,17 +171,17 @@ def _add_round_constants_bits(bits: List[int], rc: int) -> None:
 
 
 def _apply_sbox_layer(state: Sequence[int]) -> List[int]:
-    """Apply SBox to all nibbles."""
+    """Apply S-box to all nibbles."""
     return [LS_sbox[n] for n in state]
 
 
 def _apply_inv_sbox_layer(state: Sequence[int]) -> List[int]:
-    """Apply inverse SBox to all nibbles."""
+    """Apply inverse S-box to all nibbles."""
     return [LS_inv_sbox[n] for n in state]
 
 
 def _post_process_words(words: Sequence[int]) -> List[int]:
-    """Post-processing for encryption output."""
+    """Reverse the nibble order of the final state (published ciphertext convention)."""
     out: List[int] = []
     for group in range(8):
         src = words[7 - group]
@@ -216,7 +194,7 @@ def _post_process_words(words: Sequence[int]) -> List[int]:
 
 
 def _invert_post_process_words(words: Sequence[int]) -> List[int]:
-    """Invert post-processing for decryption."""
+    """Undo the ciphertext nibble-order reversal."""
     out = [0] * 8
     for group in range(8):
         src = words[group]
@@ -229,14 +207,14 @@ def _invert_post_process_words(words: Sequence[int]) -> List[int]:
 
 
 def _expand_subkeys(key: Sequence[int], rounds: int = N_ROUNDS) -> List[List[int]]:
-    """Expand key schedule for all rounds."""
+    """Expand the key schedule for all rounds (rotation in the word-packed layout)."""
     if rounds > len(RC):
         raise ValueError(f"Requested {rounds} rounds but only {len(RC)} round constants")
     current = _nibbles_to_words(key)
     subkeys = [current[:]]
     for _ in range(rounds):
         bits = _words_to_bits_lsb(current)
-        bits = bits[1:] + bits[:1]  # Rotate left by 1 bit
+        bits = bits[1:] + bits[:1]  # One-bit cyclic right rotation of the value; the array is LSB-first, so the array shifts left
         current = _bits_to_words_lsb(bits)
         subkeys.append(current[:])
     return subkeys
@@ -302,7 +280,7 @@ def decrypt(key: Sequence[int], ct: Sequence[int], no_of_rounds: int = N_ROUNDS)
     for rnd in reversed(range(no_of_rounds)):
         bits = _words_to_bits(state_words)
         _add_round_constants_bits(bits, RC[rnd])
-        bits = perm_layer(bits, inv_player)
+        bits = perm_layer(bits, INV_PLAYER)
         state_nibbles = bits_to_nibbles(bits)
         state_nibbles = _apply_inv_sbox_layer(state_nibbles)
         state_words = _nibbles_to_words(state_nibbles)
@@ -322,21 +300,105 @@ def hex_to_nibbles(hex_str: str) -> List[int]:
 
 
 if __name__ == '__main__':
-    key = [0] * 32
-    pt = [0] * 32
+    # Test vectors from designR.tex
+    TEST_VECTORS = [
+        {
+            'plaintext': '00000000000000000000000000000000',
+            'key': '00000000000000000000000000000000',
+            'expected': 'c002be5e64c78a72ab9a3439518352aa'
+        },
+        {
+            'plaintext': '00000000000000000000000000000007',
+            'key': '00000000000000000000000000000000',
+            'expected': '1ba3363734c09a29f67c23bbb2cccc05'
+        },
+        {
+            'plaintext': '70000000000000000000000000000000',
+            'key': '00000000000000000000000000000000',
+            'expected': '6f7d7746eaf0d97a154079f6bd846438'
+        },
+        {
+            'plaintext': '44444444444444444444444444444444',
+            'key': '00000000000000000000000000000000',
+            'expected': '7ad3303667b2af6deef434dd110d7fb8'
+        },
+        {
+            'plaintext': '11111111111111111111111111111111',
+            'key': 'ffffffffffffffffffffffffffffffff',
+            'expected': '806f0cf45b94f0370206975fe78ac10f'
+        },
+        {
+            'plaintext': '789a789a789a789a789a789a789a789a',
+            'key': '76543210032032032032032032032032',
+            'expected': 'f568e4e628f723ee6d5fbacccf811523'
+        },
+        {
+            'plaintext': 'b6e4789ab6e4789ab6e4789ab6e4789a',
+            'key': '23023023023023023023023001234567',
+            'expected': '77acdeed645e49da25591bf5f32658a2'
+        },
+        {
+            'plaintext': 'e6517531abf63f3d7805e126943a081c',
+            'key': '5920effb52bc61e33a98425321e76915',
+            'expected': 'ea5e0713249400a86ec61bb6cdffb364'
+        },
+        {
+            'plaintext': '3325cfadce142135242f8e04752614ab',
+            'key': 'd9bb750877be6eebc339a2258c874fc9',
+            'expected': '2b599d496ee6938cec0bae00c4947b7d'
+        },
+        {
+            'plaintext': '57cf5777053928343047ebe8dbfc374f',
+            'key': '25798b6c2b24cd83281de76786213b86',
+            'expected': '62b9d55d799a3e784583e7377229a623'
+        },
+    ]
 
-    print("\n--- Canonical permutation ---")
-    ct_alt = encrypt(key=key[:], pt=pt[:], use_gift_permutation=False)
-    print('CT ', pretty_print(ct_alt))
-    dec_alt = decrypt(key=key[:], ct=ct_alt[:], use_gift_permutation=False)
-    print('PT ', pretty_print(dec_alt))
-    assert dec_alt == pt, 'Canonical permutation failed round-trip'
-
-    print("\n--- GIFT-matching permutation ---")
-    ct_gift = encrypt(key=key[:], pt=pt[:], use_gift_permutation=True)
-    print('CT ', pretty_print(ct_gift))
-    dec_gift = decrypt(key=key[:], ct=ct_gift[:], use_gift_permutation=True)
-    print('PT ', pretty_print(dec_gift))
-    assert dec_gift == pt, 'GIFT permutation failed round-trip'
-
-    print("\n✓ Reference implementation matches.")
+    print("=" * 70)
+    print("BAKSHEESH Reference Implementation - Test Vectors")
+    print("=" * 70)
+    
+    passed = 0
+    failed = 0
+    
+    for i, tv in enumerate(TEST_VECTORS, 1):
+        key_nibbles = hex_to_nibbles(tv['key'])
+        pt_nibbles = hex_to_nibbles(tv['plaintext'])
+        
+        # Encrypt
+        ct_nibbles = encrypt(key_nibbles, pt_nibbles)
+        ct_hex = pretty_print(ct_nibbles)
+        
+        # Decrypt
+        dec_nibbles = decrypt(key_nibbles, ct_nibbles)
+        dec_hex = pretty_print(dec_nibbles)
+        
+        # Check results
+        enc_match = ct_hex == tv['expected']
+        dec_match = dec_hex == tv['plaintext']
+        
+        if enc_match and dec_match:
+            status = "PASS"
+            passed += 1
+        else:
+            status = "FAIL"
+            failed += 1
+        
+        print(f"\nTest {i}: {status}")
+        print(f"  PT:       {tv['plaintext']}")
+        print(f"  Key:      {tv['key']}")
+        print(f"  Expected: {tv['expected']}")
+        print(f"  Got:      {ct_hex}")
+        if not enc_match:
+            print("  Encryption mismatch")
+        if not dec_match:
+            print(f"  Decryption failed: {dec_hex}")
+    
+    print(f"\n{'=' * 70}")
+    print(f"Results: {passed} passed, {failed} failed out of {len(TEST_VECTORS)} tests")
+    print(f"{'=' * 70}")
+    
+    if failed == 0:
+        print("\nAll test vectors passed")
+    else:
+        print(f"\n{failed} test(s) failed")

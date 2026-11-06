@@ -1,24 +1,28 @@
 """
-BAKSHEESH Zorro with:
-1. Zorro 3-bit SBox on (x2, x1, x0)
-2. T-matrix 4-bit SBox on (x3, z2, z1, z0)
+BAKSHEESH Zorro with 128×128 Binary T-matrix
+
+Architecture:
+1. Apply 3-bit S-box to all 32 nibbles (lower 3 bits of each)
+2. Combine with x3 bits using 128×128 binary T-matrix (linear transformation)
+
 """
 
 from typing import List, Sequence
 
-# 3-bit SBox 
+# 3-bit S-box (nonlinear, secret)
 SBOX_3BIT = [1, 0, 3, 6, 5, 2, 4, 7]
 
-# T-matrix: 4×4 binary matrix (linear transformation over GF(2))
-# Transformation: [y3, y2, y1, y0]^T = TMATRIX @ [x3, z2, z1, z0]^T 
-TMATRIX = [
+# 128×128 Binary T-matrix (linear transformation over GF(2))
+# This matrix combines outputs from 32× 3-bit S-boxes (96 bits) + 32× x3 bits (32 bits) → 128 output bits
+# The matrix is block-diagonal with 32 copies of the 4×4 sub-matrix
+TMATRIX_4x4 = [
     [1, 1, 0, 0],  # y3 = x3 ⊕ z2
     [1, 0, 1, 0],  # y2 = x3 ⊕ z1
     [1, 0, 0, 1],  # y1 = x3 ⊕ z0
     [1, 0, 1, 1],  # y0 = x3 ⊕ z1 ⊕ z0
 ]
 
-# Bit-permutation (Canonical)
+# Bit-permutation (Canonical BAKSHEESH Zorro permutation)
 player = (
     96, 65, 34, 3, 64, 33, 2, 99, 32, 1, 98, 67, 0, 97, 66, 35,
     100, 69, 38, 7, 68, 37, 6, 103, 36, 5, 102, 71, 4, 101, 70, 39,
@@ -40,35 +44,103 @@ const_loc = (11, 14, 16, 32, 64, 105)
 N_rounds = 35
 
 
-def apply_two_stage_sbox(nibble: int) -> int:
+def apply_sbox_layer(state_nibbles: Sequence[int]) -> List[int]:
     """
-    Two-stages:
-    1. Apply 3-bit SBox to (x2, x1, x0) → (z2, z1, z0)
-    2. Apply 4×4 binary T-matrix (linear transformation over GF(2))
+    Apply 3-bit S-box layer to all 32 nibbles, then combine with T-matrix.
+    
+    This implementation applies the 128×128 T-matrix to the entire state:
+    - Extract x3 bits from all 32 nibbles (32 bits)
+    - Apply 3-bit S-box to lower 3 bits of all 32 nibbles (96 bits output)
+    - Combine with 128×128 T-matrix: [x3_0, z2_0, z1_0, z0_0, x3_1, z2_1, ..., z0_31]
     """
-    x0 = (nibble >> 0) & 1
-    x1 = (nibble >> 1) & 1
-    x2 = (nibble >> 2) & 1
-    x3 = (nibble >> 3) & 1
+    output_nibbles = []
     
-    # Stage 1: Apply 3-bit SBox to lower 3 bits
-    inp_3bit = (x2 << 2) | (x1 << 1) | x0
-    s3_out = SBOX_3BIT[inp_3bit]
+    for nibble in state_nibbles:
+        # Extract bits
+        x0 = (nibble >> 0) & 1
+        x1 = (nibble >> 1) & 1
+        x2 = (nibble >> 2) & 1
+        x3 = (nibble >> 3) & 1
+        
+        # Stage 1: Apply 3-bit S-box to lower 3 bits
+        inp_3bit = (x2 << 2) | (x1 << 1) | x0
+        s3_out = SBOX_3BIT[inp_3bit]
+        
+        z0 = (s3_out >> 0) & 1
+        z1 = (s3_out >> 1) & 1
+        z2 = (s3_out >> 2) & 1
+        
+        # Stage 2: Apply 4×4 T-matrix block
+        # Input: [x3, z2, z1, z0]
+        # Output: [y3, y2, y1, y0]
+        input_vec = [x3, z2, z1, z0]
+        output_bits = []
+        for row in TMATRIX_4x4:
+            bit = sum(row[i] * input_vec[i] for i in range(4)) % 2
+            output_bits.append(bit)
+        
+        # Convert to nibble
+        output_nibble = (output_bits[0] << 3) | (output_bits[1] << 2) | \
+                       (output_bits[2] << 1) | output_bits[3]
+        output_nibbles.append(output_nibble)
     
-    z0 = (s3_out >> 0) & 1
-    z1 = (s3_out >> 1) & 1
-    z2 = (s3_out >> 2) & 1
+    return output_nibbles
+
+
+def apply_sbox_layer_explicit_128x128(state_nibbles: Sequence[int]) -> List[int]:
+    """
+    Alternative implementation showing explicit 128×128 matrix structure.
     
-    # Stage 2: Apply T-matrix (linear transformation)
-    # y = TMATRIX @ [x3, z2, z1, z0]^T (mod 2)
-    input_vec = [x3, z2, z1, z0]
-    output_bits = []
-    for row in TMATRIX:
-        bit = sum(row[i] * input_vec[i] for i in range(4)) % 2
-        output_bits.append(bit)
+    The 128×128 T-matrix is block-diagonal:
+    T = diag(T_4x4, T_4x4, ..., T_4x4)  [32 blocks]
     
-    # Convert output bits to nibble: [y3, y2, y1, y0] → nibble
-    return (output_bits[0] << 3) | (output_bits[1] << 2) | (output_bits[2] << 1) | output_bits[3]
+    Input vector layout (128 bits):
+      [x3_0, z2_0, z1_0, z0_0, x3_1, z2_1, z1_1, z0_1, ..., x3_31, z2_31, z1_31, z0_31]
+    
+    Output vector layout (128 bits):
+      [y3_0, y2_0, y1_0, y0_0, y3_1, y2_1, y1_1, y0_1, ..., y3_31, y2_31, y1_31, y0_31]
+    
+    """
+    # Build 128-bit input vector
+    input_bits = []
+    for nibble in state_nibbles:
+        x0 = (nibble >> 0) & 1
+        x1 = (nibble >> 1) & 1
+        x2 = (nibble >> 2) & 1
+        x3 = (nibble >> 3) & 1
+        
+        # Apply 3-bit S-box
+        inp_3bit = (x2 << 2) | (x1 << 1) | x0
+        s3_out = SBOX_3BIT[inp_3bit]
+        
+        z0 = (s3_out >> 0) & 1
+        z1 = (s3_out >> 1) & 1
+        z2 = (s3_out >> 2) & 1
+        
+        # Add to input vector: [x3, z2, z1, z0] for this nibble
+        input_bits.extend([x3, z2, z1, z0])
+    
+    # Apply 128×128 T-matrix (block-diagonal)
+    output_bits = [0] * 128
+    for block_idx in range(32):
+        # Process 4 bits at a time (one nibble)
+        base = block_idx * 4
+        input_vec = input_bits[base:base+4]
+        
+        # Apply 4×4 matrix to this block
+        for out_bit in range(4):
+            bit_sum = sum(TMATRIX_4x4[out_bit][i] * input_vec[i] for i in range(4))
+            output_bits[base + out_bit] = bit_sum % 2
+    
+    # Convert output bits back to nibbles
+    output_nibbles = []
+    for i in range(32):
+        base = i * 4
+        nibble = (output_bits[base] << 3) | (output_bits[base+1] << 2) | \
+                 (output_bits[base+2] << 1) | output_bits[base+3]
+        output_nibbles.append(nibble)
+    
+    return output_nibbles
 
 
 def nibbles_to_bits(x: Sequence[int]) -> List[int]:
@@ -170,11 +242,6 @@ def add_round_constants_bits(bits: List[int], rc: int) -> None:
         bits[pos] ^= (rc >> i) & 1
 
 
-def apply_sbox_layer(state: Sequence[int]) -> List[int]:
-    """Apply two-stage SBox to all nibbles"""
-    return [apply_two_stage_sbox(n) for n in state]
-
-
 def post_process_words(words: Sequence[int]) -> List[int]:
     out: List[int] = []
     for group in range(8):
@@ -194,13 +261,26 @@ def expand_subkeys(key: Sequence[int], rounds: int = N_rounds) -> List[List[int]
     subkeys = [current[:]]
     for _ in range(rounds):
         bits = words_to_bits_lsb(current)
-        bits = bits[1:] + bits[:1]  # Rotate left by 1
+        bits = bits[1:] + bits[:1]  # One-bit cyclic right rotation of the value; the array is LSB-first, so the array shifts left
         current = bits_to_words_lsb(bits)
         subkeys.append(current[:])
     return subkeys
 
 
-def encrypt(key: Sequence[int], pt: Sequence[int], no_of_rounds: int = N_rounds) -> List[int]:
+def encrypt(key: Sequence[int], pt: Sequence[int], no_of_rounds: int = N_rounds, 
+            use_explicit: bool = False) -> List[int]:
+    """
+    Encrypt plaintext with BAKSHEESH Zorro using 128×128 T-matrix.
+    
+    Args:
+        key: 32 nibbles (128-bit key)
+        pt: 32 nibbles (128-bit plaintext)
+        no_of_rounds: Number of rounds (default 35)
+        use_explicit: If True, use explicit 128×128 matrix formulation
+    
+    Returns:
+        32 nibbles (128-bit ciphertext)
+    """
     if len(key) != 32:
         raise ValueError("Key must be 32 nibbles")
     if len(pt) != 32:
@@ -211,10 +291,12 @@ def encrypt(key: Sequence[int], pt: Sequence[int], no_of_rounds: int = N_rounds)
     subkeys = expand_subkeys(key, no_of_rounds)
     state_words = nibbles_to_words(pt)
 
+    sbox_fn = apply_sbox_layer_explicit_128x128 if use_explicit else apply_sbox_layer
+
     for rnd in range(no_of_rounds):
         state_words = xor_words(state_words, subkeys[rnd])
         state_nibbles = words_to_nibbles(state_words)
-        state_nibbles = apply_sbox_layer(state_nibbles)
+        state_nibbles = sbox_fn(state_nibbles)
         bits = nibbles_to_bits(state_nibbles)
         bits = perm_layer(bits, player)
         add_round_constants_bits(bits, RC[rnd])
@@ -237,9 +319,9 @@ def hex_to_nibbles(hex_str: str) -> List[int]:
 
 
 if __name__ == '__main__':
-    print("=" * 60)
+    print("=" * 70)
     
-    # Test vectors from paper
+    # Test vectors from designR.tex
     test_vectors = [
         {
             'plaintext': '00000000000000000000000000000000',
@@ -293,29 +375,33 @@ if __name__ == '__main__':
         },
     ]
     
-    
-    passed = 0
-    for i, tv in enumerate(test_vectors):
-        # Convert hex strings to nibble lists
-        pt_nibbles = hex_to_nibbles(tv['plaintext'])
-        key_nibbles = hex_to_nibbles(tv['key'])
+    # Test both implementations
+    for impl_name, use_explicit in [("Block-wise", False), ("Explicit 128×128", True)]:
+        print("=" * 70)
+        print(f"Testing: {impl_name} Implementation")
+        print("=" * 70)
         
-        # Encrypt
-        ct_nibbles = encrypt(key_nibbles, pt_nibbles)
-        result_hex = pretty_print(ct_nibbles)
+        passed = 0
+        for i, tv in enumerate(test_vectors):
+            pt_nibbles = hex_to_nibbles(tv['plaintext'])
+            key_nibbles = hex_to_nibbles(tv['key'])
+            
+            ct_nibbles = encrypt(key_nibbles, pt_nibbles, use_explicit=use_explicit)
+            result_hex = pretty_print(ct_nibbles)
+            
+            match = result_hex == tv['expected']
+            if match:
+                passed += 1
+            
+            if i == 0 or not match:  # Show first test and any failures
+                status = "PASS" if match else "FAIL"
+                print(f"\nTest {i + 1}: {status}")
+                print(f"  Expected: {tv['expected']}")
+                print(f"  Got:      {result_hex}")
         
-        match = result_hex == tv['expected']
-        status = "✅ PASS" if match else "❌ FAIL"
+        print(f"\nResult: {passed}/{len(test_vectors)} tests passed")
         
-        print(f"\nTest {i + 1}: {status}")
-        print(f"  Plaintext: {tv['plaintext']}")
-        print(f"  Key:       {tv['key']}")
-        print(f"  Expected:  {tv['expected']}")
-        print(f"  Got:       {result_hex}")
+        if passed == len(test_vectors):
+            print("All tests passed")
         
-        if match:
-            passed += 1
-    
-    print(f"\n{'=' * 60}")
-    print(f"Result: {passed}/{len(test_vectors)} tests passed")
-    print(f"{'=' * 60}")
+        print()

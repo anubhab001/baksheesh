@@ -1,0 +1,51 @@
+# Round-by-Round Encryption Update
+
+Round key and state at round end for every round of one encryption, generated
+from `baksheesh.py`. Values follow its reading order (leftmost character =
+nibble 0 of the state array). Round 00 denotes the whitening step; its round
+key is the master key. Per-layer values are given in `encryption_trace.txt`.
+
+Both encodings are valid, as long as one is used consistently:
+
+* Plaintext : `57cf5777053928343047ebe8dbfc374f` (left to right) = `f473cfbd8ebe7403438293507775fc75` (right to left)
+* Key       : `25798b6c2b24cd83281de76786213b86` (left to right)
+* Ciphertext: `62b9d55d799a3e784583e7377229a623` (left to right) = `326a9227737e385487e3a997d55d9b26` (right to left; equals round 35 state)
+
+| Round | Round key | State at round end |
+|:-:|:-:|:-:|
+| 00 | `25798b6c2b24cd83281de76786213b86` | `72b6dc1b2e1de5b7185a0c8f5ddd0cc9` |
+| 01 | `12bc45b69592e6c1940ef3b343109dc3` | `b217800bf3f4b946d6686351eb079de7` |
+| 02 | `095e22dbcac97360ca0779d9a1884ee1` | `abd4a664aa97d742edbef0a6eadb878f` |
+| 03 | `84af916d6564b9b0e5033cecd0c42770` | `3d7daa7bfcea811d4fb8dd00783a4648` |
+| 04 | `c25748b632b2dcd872811e76686293b8` | `379fda7f3ae2ff22989715afc34a6936` |
+| 05 | `612b245b1959ee6c39400f3b3431c9dc` | `157e74d5c25903b0e1b2fee29f8628e5` |
+| 06 | `b095922d0cac77369ca0879d1a18e4ee` | `f26685f9d7fb539130dae4d0655b8378` |
+| 07 | `d84a491606563b9bce5043ce0d0cf277` | `606ffa5a433aa0d7c9ed0df200cf41e8` |
+| 08 | `6c25248b832b1dcd672821e78686793b` | `41ee47f612d35fffeebadae617594d25` |
+| 09 | `b6129245c1950ee6b39410f3c343bc9d` | `edb12ea277447cb50a91594b2b2287d3` |
+| 10 | `db09c92260ca0773d9ca8879e1a15e4e` | `e9b91a48ce3dab5e1e3e1715c40f6d20` |
+| 11 | `6d846491b06503b9ece5c43c70d0af27` | `d56186b7c8a4d6a80596fce6078cfb1d` |
+| 12 | `b6c2b248d83281dc7672621eb8685793` | `be586f3338e8653cf88b739c262465d3` |
+| 13 | `5b6159246c1940ee3b39310fdc342bc9` | `b7b50dec85558ed3aae89cef819924e6` |
+| 14 | `2db0ac92360ca0779d9c1887ee1a95e4` | `0aeaf95cc451a7e594c88dfa88856f07` |
+| 15 | `16d856499b06503bcece0c43770d4af2` | `c1bd2c012f0371ebd717c1804253923d` |
+| 16 | `8b6c2b24cd83281de76786213b862579` | `0bfa0fdb4bb141630230203619fce5b1` |
+| 17 | `45b69592e6c1940ef3b343109dc312bc` | `f48d6bb35cea6e48e1b376849e6f13ef` |
+| 18 | `22dbcac97360ca0779d9a1884ee1095e` | `d813d6fdf23cf1f2d988efc150ce61cd` |
+| 19 | `916d6564b9b0e5033cecd0c4277084af` | `191e8018cb700713b7ff54a6ef7455f7` |
+| 20 | `48b632b2dcd872811e76686293b8c257` | `62cd196b8c4f0a353a1ef505cedcc362` |
+| 21 | `245b1959ee6c39400f3b3431c9dc612b` | `c65e087922b72c8ca562d57f4879b65e` |
+| 22 | `922d0cac77369ca0879d1a18e4eeb095` | `df999878e85853537df93ab3a2ca6b71` |
+| 23 | `491606563b9bce5043ce0d0cf277d84a` | `84c92fa085feff08ff13f10c0c7217c0` |
+| 24 | `248b832b1dcd672821e78686793b6c25` | `c490127d869d77cd469687aca8ac3a45` |
+| 25 | `9245c1950ee6b39410f3c343bc9db612` | `fc8b938412601f5d620d5ede8e351add` |
+| 26 | `c92260ca0773d9ca8879e1a15e4edb09` | `941c43a248a39412a65ad7fb570f7cda` |
+| 27 | `6491b06503b9ece5c43c70d0af276d84` | `5500e25d2d4bfaba8fa2eb0472eae5ae` |
+| 28 | `b248d83281dc7672621eb8685793b6c2` | `ad73d3d3577df50d15e6cf3f67f06467` |
+| 29 | `59246c1940ee3b39310fdc342bc95b61` | `a1dd2833df2a726139ecc98ec4ea6aec` |
+| 30 | `ac92360ca0779d9c1887ee1a95e42db0` | `304240e8af49d08c358330c3315cd88f` |
+| 31 | `56499b06503bcece0c43770d4af216d8` | `69dfc452d2a11fc17d733355b50fcb10` |
+| 32 | `2b24cd83281de76786213b8625798b6c` | `0d122881f8fd52160931f69090f8665c` |
+| 33 | `9592e6c1940ef3b343109dc312bc45b6` | `a1099375ba4a1a93efa4069a52fc576a` |
+| 34 | `cac97360ca0779d9a1884ee1095e22db` | `5f55ee5bd5bec2941d1137bde669309b` |
+| 35 | `6564b9b0e5033cecd0c4277084af916d` | `326a9227737e385487e3a997d55d9b26` |

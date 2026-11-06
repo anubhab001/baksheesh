@@ -50,3 +50,11 @@ Thumbs.db
 
 */a.out
 */a.exe
+
+# Compiled reference and benchmark binaries (no extension)
+reference/bak4
+reference/bak8
+reference/bakcpp
+optimised-fixslice/benchmark_arm
+optimised-fixslice/benchmark_native
+optimised-fixslice/comprehensive_benchmark
