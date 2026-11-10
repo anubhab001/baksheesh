@@ -9,9 +9,15 @@
 typedef unsigned char u8;
 typedef unsigned int u32;
 
+/* Portable C baseline, operating directly on a whitened round-key schedule. */
+extern void gift128_encrypt_block_ref(u8* out_block, const u32* rkey, const u8* in_block);
+/* ARM assembly, optimised for code size. */
 extern void gift128_keyschedule(const u8* key, u32* rkey);
 extern void gift128_encrypt_block(u8* out_block, const u32* rkey, const u8* in_block);
 extern void giftb128_encrypt_block(u8* out_block, const u32* rkey, const u8* in_block);
+/* 1st-order masked ARM assembly. */
+extern void gift128_encrypt_block_masked(u8* out_block, const u32* rkey, const u8* in_block);
+
 #ifdef __cplusplus
 }
 #endif

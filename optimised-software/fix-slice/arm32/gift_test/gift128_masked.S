@@ -257,10 +257,10 @@ quintuple_round_masked:
 * 1st order masked implementation of the GIFT-128 block cipher. This function
 * simply encrypts a 128-bit block, without any operation mode.
 *****************************************************************************/
-@ void gift128_encrypt_block(u8 *out, const u32* rkey, const u8 *block)
-.global gift128_encrypt_block
-.type   gift128_encrypt_block,%function
-gift128_encrypt_block:
+@ void gift128_encrypt_block_masked(u8 *out, const u32* rkey, const u8 *block)
+.global gift128_encrypt_block_masked
+.type   gift128_encrypt_block_masked,%function
+gift128_encrypt_block_masked:
     push    {r0-r12,r14}
     // ------------------ PACKING ------------------
     ldm     r2, {r4-r7}     // load plaintext blocks

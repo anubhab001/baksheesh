@@ -42,18 +42,16 @@
 *   - n             ror index value to math fixslicing
 ******************************************************************************/
 .macro sbox     in0, in1, in2, in3, tmp
-    and     \tmp, \in2, \in1
-    mvn     \tmp, \tmp    
-    eor     \in0, \in0, \tmp    
-    eor     \in3, \in3, \in0
-    mvn     \tmp, \in0
-    and     \tmp, \tmp, \in2
+    orn     \tmp, \in2, \in3
     eor     \in1, \in1, \tmp
-    and     \tmp, \in1, \in0
-    eor     \in2, \in2, \tmp
-    eor     \in1, \in1, \in3
-    eor     \in0, \in0, \in1
+    orn     \tmp, \in3, \in1
+    eor     \in2, \in2, \in1
+    orn     \tmp, \in2, \in1
+    eor     \in3, \in3, \tmp
     eor     \in2, \in2, \in0
+    eor     \in1, \in1, \in2
+    eor     \in0, \in0, \in3
+    eor     \in3, \in3, \in1
 .endm
 
 /******************************************************************************
@@ -171,33 +169,17 @@
     eor     \in1, r7, \in1, ror #24             // add 4st keyword
 .endm
 
-/*****************************************************************************
-* Subroutine to implement a quintuple round of GIFT-128.
-*****************************************************************************/
-.align 2
-quintuple_round:
-    str.w   r14, [sp]
-    round_0     r9, r10, r11, r12
-    round_1     r10, r12, r9, r11
-    round_2     r12, r11, r10, r9
-    round_3     r11, r9, r12, r10 
-    round_4     r9, r10, r11, r12
-    ldr.w   r14, [sp]
-    mov         r5, r9
-    mov         r9, r10
-    mov         r10, r12
-    mov         r12, r11
-    mov         r11, r5
-    bx      lr
+
 
 /*****************************************************************************
 * Fully unrolled implementation of the GIFT-128 block cipher.
 * This function simply encrypts a 128-bit block, without any operation mode.
 *****************************************************************************/
-@ void encrypt_block(u8 *out, const u32* rkey, const u8 *block)
-.global encrypt_block
-.type   encrypt_block,%function
-encrypt_block:
+.align 2
+@ void encrypt_block_fast(u8 *out, const u32* rkey, const u8 *block)
+.global encrypt_block_fast
+.type   encrypt_block_fast,%function
+encrypt_block_fast:
     push {r2-r12,r14}
     ldm         r2, {r4-r7}     // load plaintext blocks in r4-r7
     rev         r4, r4          // endianess to match the fixsliced representation
@@ -240,59 +222,99 @@ encrypt_block:
     lsl         r2, r2, #4                      // r2 <- 0x0f000f00 for SWAPMOVE
     swpmv       r11, r12, r11, r12, r2, #4,  r3
     // ------------------ GIFTb-CORE ROUTINE ------------------
-    mov     r3, r2, lsr #8                  // r3 <- 0x000f000f (for HALF_ROR)
-    movw    r2, #0x1111
-    movt    r2, #0x1111                     // r2 <- 0x11111111 (for NIBBLE_ROR)
-    mvn     r4, r2, lsl #3                  // r4 <- 0x7777777 (for NIBBLE_ROR)
+    mov         r3, r2, lsr #8              // r3 <- 0x000f000f
+    movw        r2, #0x1111
+    movt        r2, #0x1111                 // r12<- 0x11111111
+    mvn         r4, r2, lsl #3              // r4 <- 0x77777777
+    
+  
+    round_0     r9, r10, r11, r12
+    round_1     r10, r12, r9, r11
+    round_2     r12, r11, r10, r9
+    round_3     r11, r9, r12, r10 
+    round_4     r9, r10, r11, r12
+    
+    round_0     r10, r12, r9, r11
+    round_1     r12, r11, r10, r9
+    round_2     r11, r9, r12, r10
+    round_3     r9, r10, r11, r12
+    round_4     r10, r12, r9, r11
+    
+    round_0     r12, r11, r10, r9
+    round_1     r11, r9, r12, r10
+    round_2     r9, r10, r11, r12
+    round_3     r10, r12, r9, r11
+    round_4     r12, r11, r10, r9
+    
+    round_0     r11, r9, r12, r10
+    round_1     r9, r10, r11, r12
+    round_2     r10, r12, r9, r11
+    round_3     r12, r11, r10, r9
+    round_4     r11, r9, r12, r10
+    
+    round_0     r9, r10, r11, r12
+    round_1     r10, r12, r9, r11
+    round_2     r12, r11, r10, r9
+    round_3     r11, r9, r12, r10
+    round_4     r9, r10, r11, r12
+    
+    round_0     r10, r12, r9, r11
+    round_1     r12, r11, r10, r9
+    round_2     r11, r9, r12, r10
+    round_3     r9, r10, r11, r12
+    round_4     r10, r12, r9, r11
+    
+    round_0     r12, r11, r10, r9
+    round_1     r11, r9, r12, r10
+    round_2     r9, r10, r11, r12
+    round_3     r10, r12, r9, r11
+    round_4     r12, r11, r10, r9
 
-    bl      quintuple_round
-    bl      quintuple_round
-    bl      quintuple_round
-    bl      quintuple_round
-    bl      quintuple_round
-    bl      quintuple_round
-    bl      quintuple_round
+    //r9, r10, r11, r12
+    //r11, r9, r12, r10
+
+    
+    
+    
     // ------------------ UNPACKING ------------------ 
-    ldr.w   r0, [sp, #4]                    //restore 'ctext' address
-    movw    r2, #0x0f00
-    movt    r2, #0x0f00                     // r2 <- 0x0f000f00 for SWAPMOVE
-    swpmv   r11, r12, r11, r12, r2, #4,  r3
-    lsr     r2, r2, #4                      // r2 <- 0x00f000f0 for SWAPMOVE
-    swpmv   r10, r12, r10, r12, r2, #8,  r3
-    swpmv   r10, r11, r10, r11, r2, #4,  r3
-    lsr     r2, r2, #4                      // r2 <- 0x000f000f for SWAPMOVE
-    swpmv   r9,  r12, r9,  r12, r2, #12, r3
-    swpmv   r9,  r11, r9,  r11, r2, #8,  r3
-    swpmv   r9,  r10, r9,  r10, r2, #4,  r3
-    movw    r2, #0x00cc
-    movt    r2, #0x00cc                     // r2 <- 0x00cc00cc for SWAPMOVE
-    swpmv   r9,  r9,  r9,  r9,  r2, #6, r3
-    swpmv   r10, r10, r10, r10, r2, #6, r3
-    swpmv   r11, r11, r11, r11, r2, #6, r3
-    swpmv   r12, r12, r12, r12, r2, #6, r3
-    movw    r2, #0x0a0a
-    movt    r2, #0x0a0a                     // r2 <- 0x0a0a0a0a for SWAPMOVE
-    swpmv   r9,  r9,  r9,  r9,  r2, #3, r3
-    swpmv   r10, r10, r10, r10, r2, #3, r3
-    swpmv   r11, r11, r11, r11, r2, #3, r3
-    swpmv   r12, r12, r12, r12, r2, #3, r3
-    lsr     r4, r12, #16
-    lsr     r5, r11, #16
-    orr     r4, r5, r4, lsl #16             // r4 <- out[0]
-    lsr     r5, r10, #16
-    lsr     r6, r9, #16
-    orr     r5, r6, r5, lsl #16             // r5 <- out[1]
-    lsl     r6, r12, #16
-    lsl     r7, r11, #16
-    orr     r6, r6, r7, lsr #16             // r6 <- out[2]
-    lsl     r7, r10, #16
-    lsl     r8, r9, #16
-    orr     r7, r7, r8, lsr #16             // r7 <- out[3]
-    rev     r4, r4
-    rev     r5, r5
-    rev     r6, r6
-    rev     r7, r7
-    stm     r0, {r4-r7}
-    add.w   sp, #4
-    pop     {r0,r2-r12,r14}
-    bx      lr
+    movw        r2, #0x0f00
+    movt        r2, #0x0f00                     // r2 <- 0x0f000f00 for SWAPMOVE
+    swpmv       r12, r10, r12, r10, r2, #4,  r3
+    lsr         r2, r2, #4                      // r2 <- 0x00f000f0 for SWAPMOVE
+    swpmv       r9, r10, r9, r10, r2, #8,  r3
+    swpmv       r9, r12, r9, r12, r2, #4,  r3
+    lsr         r2, r2, #4                      // r2 <- 0x000f000f for SWAPMOVE
+    swpmv       r11,  r10, r11,  r10, r2, #12, r3
+    swpmv       r11,  r12, r11,  r12, r2, #8,  r3
+    swpmv       r11,  r9, r11,  r9, r2, #4,  r3
+    movw        r2, #0x00cc
+    movt        r2, #0x00cc                     // r2 <- 0x00cc00cc for SWAPMOVE
+    swpmv       r11,  r11,  r11,  r11,  r2, #6, r3
+    swpmv       r9, r9, r9, r9, r2, #6, r3
+    swpmv       r12, r12, r12, r12, r2, #6, r3
+    swpmv       r10, r10, r10, r10, r2, #6, r3
+    movw        r2, #0x0a0a
+    movt        r2, #0x0a0a                     // r2 <- 0x0a0a0a0a for SWAPMOVE
+    swpmv       r11,  r11,  r11,  r11,  r2, #3, r3
+    swpmv       r9, r9, r9, r9, r2, #3, r3
+    swpmv       r12, r12, r12, r12, r2, #3, r3
+    swpmv       r10, r10, r10, r10, r2, #3, r3
+    lsr         r4, r10, #16
+    lsr         r5, r12, #16
+    orr         r4, r5, r4, lsl #16             // r4 <- out[0]
+    lsr         r5, r9, #16
+    lsr         r6, r11, #16
+    orr         r5, r6, r5, lsl #16             // r5 <- out[1]
+    lsl         r6, r10, #16
+    lsl         r7, r12, #16
+    orr         r6, r6, r7, lsr #16             // r6 <- out[2]
+    lsl         r7, r9, #16
+    lsl         r8, r11, #16
+    orr         r7, r7, r8, lsr #16             // r7 <- out[3]
+    rev         r4, r4
+    rev         r5, r5
+    rev         r6, r6
+    rev         r7, r7
+    stm         r0, {r4-r7}
+    pop         {r2-r12,r14}
+    bx          lr
