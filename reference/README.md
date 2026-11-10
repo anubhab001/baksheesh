@@ -1,8 +1,10 @@
 # Round-by-Round Encryption Walkthrough
 
-* Plaintext : `57cf5777053928343047ebe8dbfc374f` (left-to-right) = `f473cfbd8ebe7403438293507775fc75` (right-to-left)
-* Key       : `25798b6c2b24cd83281de76786213b86` (left-to-right)
-* Ciphertext: `62b9d55d799a3e784583e7377229a623` (left-to-right) = `326a9227737e385487e3a997d55d9b26` (right-to-left)
+The paper and the test vectors read the plaintext and the key left-to-right, and write the ciphertext right-to-left; this is kept for historical reasons, and the checkmark below marks that choice. The left-to-right ciphertext is equally valid and may be used without reservation.
+
+* Plaintext : `57cf5777053928343047ebe8dbfc374f` (left-to-right ✓) = `f473cfbd8ebe7403438293507775fc75` (right-to-left)
+* Key       : `25798b6c2b24cd83281de76786213b86` (left-to-right ✓)
+* Ciphertext: `62b9d55d799a3e784583e7377229a623` (left-to-right, also acceptable) = `326a9227737e385487e3a997d55d9b26` (right-to-left ✓)
 
 | Round | Round key | Updated state (at round end) |
 |:-:|:-:|:-:|
