@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-BAKSHEESH Round Constants Generator 
+BAKSHEESH Round Constants Generator
 
-CORRECTED Hardware Logic:
+Hardware-style construction, matching the specification:
 - 5-bit LFSR with right-shift operation
-- Feedback polynomial: x^5 x^2 + 1 (taps at positions 2 and 0)  
-- Initialization: 00001
+- Feedback polynomial: x^5 + x^2 + 1 (taps at positions 2 and 0)
+- Initialisation: 00001
 - Toggle bit at position 0 (LSB)
 - Round constant = (LFSR << 1) | toggle
 """

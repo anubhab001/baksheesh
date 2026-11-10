@@ -1,5 +1,5 @@
-// Benchmarks the C reference and the two ARM assembly variants (compact,
-// masked) of the GIFT-128 heritage of the cipher.
+// Benchmarks the C reference and the three ARM assembly variants (compact,
+// bit-sliced GIFTb-128, masked) of the GIFT-128 heritage of the cipher.
 #include "gift128.h"
 #pragma GCC optimize ("-O3")
 
@@ -43,6 +43,7 @@ void setup() {
     u32 rkey_compact[160] = {0,};
     gift128_keyschedule(key, rkey_compact);
     bench("compact", gift128_encrypt_block, rkey_compact);
+    bench("giftb128", giftb128_encrypt_block, rkey_compact);
 
     u32 rkey_masked[164] = {0,};
     bench("masked ", gift128_encrypt_block_masked, rkey_masked);
