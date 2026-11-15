@@ -9,8 +9,7 @@ This [repository](https://github.com/anubhab001/baksheesh) contains source-codes
 ├── hardware-ti-order-3
 ├── hardware-unprotected
 ├── optimised-fixslice
-├── optimised-software
-│   └── fix-slice
+├── optimised-software-fixslice
 └── reference
 ```
 
